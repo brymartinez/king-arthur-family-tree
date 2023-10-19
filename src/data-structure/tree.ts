@@ -7,7 +7,7 @@ export interface TreeNode<Person> {
 
 export class Tree<T> {
   root: TreeNode<Person> | undefined = undefined;
-
+  length = 0;
   public insert(data: Person): Tree<T> {
     if (!this.root) {
       this.root = { data, children: [] };
@@ -17,7 +17,7 @@ export class Tree<T> {
     const child = new Tree<T>();
 
     this.root.children.push(child.insert(data));
-
+    this.length++;
     return child;
   }
 }
