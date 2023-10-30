@@ -1,3 +1,4 @@
+import { PersonNotFoundError } from '../errors/error';
 import { Tree, TreeNode } from '../data-structure/tree';
 import { Person, Relationship } from './relationship';
 
@@ -5,31 +6,40 @@ export class Siblings implements Relationship {
   constructor(private tree: Tree<Person>) {}
 
   get(name: string) {
-    return this.breadthFirst(name, this.tree.root);
+    const siblings = this.find(name);
+    if (!siblings.length) throw new PersonNotFoundError();
+    return siblings;
   }
 
-  private breadthFirst(name: string, root: TreeNode<Person>): Person[] {
-    const queue: (TreeNode<Person> | undefined)[] = [root];
+  // find mother, and print out children sans name
+  private find(name: string): Person[] {
+    let found = false;
 
-    while (queue.length) {
-      const node = queue.pop();
+    let result: Person[] = [];
 
-      if (node) {
-        for (const child of node.children) {
-          if (child.root.data.name === name) {
-            return node.children
-              .map((p) => {
-                return {
-                  ...p.root.data,
-                };
+    const traverse = (node: TreeNode<Person>) => {
+      if (node.children.length && !found) {
+        for (let i = 0; i < node.children.length; i++) {
+          const currentNode = node.children[i].root;
+          traverse(currentNode);
+          if (
+            currentNode.children.findIndex(
+              (child) => child.root.data.name === name,
+            ) > -1
+          ) {
+            found = true;
+            result = currentNode.children
+              .filter((child) => {
+                return child.root.data.name !== name;
               })
-              .filter((s) => s.name !== name);
+              .map((c) => c.root.data);
+            found = true;
           }
-          queue.push(child.root);
         }
       }
-    }
+    };
+    traverse(this.tree.root);
 
-    return [];
+    return result;
   }
 }
