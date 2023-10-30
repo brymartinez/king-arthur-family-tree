@@ -1,4 +1,3 @@
-GET_RELATIONSHIP Draco Father
-GET_RELATIONSHIP William Mother
-GET_RELATIONSHIP Ronald Children
-
+ADD_CHILD Flora Minerva Female
+GET_RELATIONSHIP Remus Maternal-Aunt
+GET_RELATIONSHIP Minerva Siblings

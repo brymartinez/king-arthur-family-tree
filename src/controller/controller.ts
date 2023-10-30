@@ -1,5 +1,5 @@
 import { Adapter } from '../utils/adapter';
-import { Tree } from '../data-structure/tree';
+import { Tree, TreeNode } from '../data-structure/tree';
 import {
   Gender,
   Person,
@@ -22,6 +22,7 @@ export class Controller {
           const mother = args[0];
           const child = args[1];
           const gender = args[2] as Gender;
+          this.addChild(child, gender, mother);
           console.log('CHILD_ADDED');
           break;
         case 'GET_RELATIONSHIP':
@@ -37,5 +38,35 @@ export class Controller {
       console.error(e);
       console.log(e.message);
     }
+  }
+
+  private addChild(name: string, gender: Gender, mother: string) {
+    let found = false;
+
+    let result: Tree<Person>;
+
+    const traverse = (node: TreeNode<Person>) => {
+      if (node.children.length && !found) {
+        for (let i = 0; i < node.children.length; i++) {
+          const currentNode = node.children[i].root;
+          traverse(currentNode);
+          if (
+            currentNode.data.name === mother ||
+            currentNode.data.spouse?.name === mother
+          ) {
+            result = node.children[i];
+
+            found = true;
+          }
+        }
+      }
+    };
+
+    traverse(this.tree.root);
+    result.insert({
+      name: name,
+      gender: gender,
+    });
+    return result;
   }
 }
