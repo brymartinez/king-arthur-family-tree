@@ -5,6 +5,7 @@ import {
   Person,
   RelationshipObject,
 } from '../relationships/relationship';
+import { PersonNotFoundError } from '../errors/error';
 
 export enum Command {
   ADD_CHILD = 'ADD_CHILD',
@@ -26,14 +27,14 @@ export class Controller {
         case 'GET_RELATIONSHIP':
           const member = args[0];
           const rel = args[1].toLowerCase();
+          const result = RelationshipObject(this.tree)[rel].get(member);
           console.log(
-            this.adapter.transform(
-              RelationshipObject(this.tree)[rel]?.get(member),
-            ) ?? 'PERSON_NOT_FOUND',
+            this.adapter.transform(result) ?? new PersonNotFoundError().message,
           );
           break;
       }
     } catch (e) {
+      console.error(e);
       console.log(e.message);
     }
   }

@@ -1,3 +1,4 @@
+import { PersonNotFoundError } from '../errors/error';
 import { Tree, TreeNode } from '../data-structure/tree';
 import { Person, Relationship } from './relationship';
 
@@ -5,20 +6,36 @@ export class Children implements Relationship {
   constructor(private tree: Tree<Person>) {}
 
   get(name: string) {
-    return this.traversePreOrder(name, this.tree.root);
+    const children = this.find(name);
+    if (!children.length) throw new PersonNotFoundError();
+    return children;
   }
 
-  private traversePreOrder(name: string, root: TreeNode<Person>, result = []) {
-    if (root.data.name === name || root.data.spouse.name === name) {
-      return root.children.map((p) => {
-        return {
-          ...p.root.data,
-        };
-      });
-    } else {
-      for (const child of root.children) {
-        this.traversePreOrder(name, child.root, result);
+  private find(name: string): Person[] {
+    let found = false;
+
+    let result: Person[] = [];
+
+    const traverse = (node: TreeNode<Person>) => {
+      if (node.children.length && !found) {
+        for (let i = 0; i < node.children.length; i++) {
+          const currentNode = node.children[i].root;
+          traverse(currentNode);
+          if (
+            currentNode.data.name === name ||
+            currentNode.data.spouse?.name === name
+          ) {
+            result = currentNode.children.map((child) => {
+              return child.root.data;
+            });
+            found = true;
+          }
+        }
       }
-    }
+    };
+
+    traverse(this.tree.root);
+
+    return result;
   }
 }
